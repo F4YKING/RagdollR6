@@ -8,3 +8,9 @@ I made this out of curiosity on how to make ragdoll with R6, this module was mad
 ```toml
 RagdollR6 = "f4yking/ragdollr6@1.0.0"
 ```
+
+Don' Forget to add this so Trove would work.
+```toml
+[place]
+shared-packages = "game.ReplicatedStorage.Packages"
+```
