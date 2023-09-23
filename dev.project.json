@@ -1,0 +1,23 @@
+{
+  "name": "RagdollR6-Dev",
+  "tree": {
+    "$className": "DataModel",
+
+    "ServerScriptService": {
+
+      "RagdollScript": {
+        "$path": "RagdollScript"
+      },
+
+      "RagdollR6": {
+        "$path": "RagdollR6"
+      },
+      
+      "Trove": {
+        "$path": "Packages/_Index/sleitnick_trove@1.0.1/trove"
+      }
+
+    }
+
+  }
+}
