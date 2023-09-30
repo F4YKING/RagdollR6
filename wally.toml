@@ -1,11 +1,16 @@
 [package]
 name = "f4yking/ragdollr6"
 description = "R6 Ragdoll Module."
-version = "1.0.0"
+version = "1.0.1"
+
 license = "MIT"
 authors = ["F4YKING"]
-registry = "https://github.com/UpliftGames/wally-index"
+
 realm = "server"
+registry = "https://github.com/UpliftGames/wally-index"
+
+exclude = ["**"]
+include = ["RagdollR6", "RagdollR6/*", "default.project.json", "wally.toml"]
 
 [dependencies]
 Trove = "sleitnick/trove@1.0.1"

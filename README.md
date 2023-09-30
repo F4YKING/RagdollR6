@@ -6,7 +6,7 @@ I made this out of curiosity on how to make ragdoll with R6, this module was mad
 
 ## Wally
 ```toml
-RagdollR6 = "f4yking/ragdollr6@1.0.0"
+RagdollR6 = "f4yking/ragdollr6@1.0.1"
 ```
 
 Don't Forget to add this so Trove would work.
