@@ -13,8 +13,9 @@ local AttachmentData = require(script.AttachmentData)
 local BallSocketData = require(script.BallSocketData)
 
 ---- Initialize ----
+
 -- RagdollR6
-local RagdollR6 = {}
+local RagdollR6: RagdollR6 = {}; export type RagdollR6 = typeof(RagdollR6.new())
 RagdollR6.__index = RagdollR6
 
 --[=[
@@ -26,11 +27,15 @@ function RagdollR6.new(plr: Player)
     local self = setmetatable({}, RagdollR6)
     self._trove = Trove.new()
 
-    self.Player = plr
-    self.Char = nil
+    self.Player = plr :: Player
+
+    self.Char = nil :: Model
+    self.Humanoid = nil :: Humanoid
 
     self.Limbs = {}
     self.Atts = {}
+
+    self.Accessories = {}
 
     return self
 end
@@ -42,8 +47,11 @@ end
 function RagdollR6:Init(char: Model)
 
 	self.Char = char
+    self.Humanoid = char and char:FindFirstChild("Humanoid")
 
     if not self:Checks() then self:Destroy() return end
+
+    self.Humanoid.BreakJointsOnDeath = false
 
     for _, LimbName in ipairs(LimbTree) do
 		self.Limbs[LimbName] = self.Char:FindFirstChild(LimbName)
@@ -56,6 +64,8 @@ end
 ]=]
 
 function RagdollR6:Start()
+
+    self.Limbs.HumanoidRootPart.CanCollide = false
 
     if self.Limbs.Torso and not self.Limbs.Torso:FindFirstChild("NeckJoint") then
 
@@ -83,8 +93,6 @@ function RagdollR6:Start()
         end
 
     end
-
-    self.Limbs.HumanoidRootPart.CanCollide = false
 
     for _, v: BasePart | Motor6D in ipairs(self.Char:GetDescendants()) do
 
@@ -138,7 +146,7 @@ function RagdollR6:Checks()
 
     return self.Player and
         self.Char and
-        self.Char:FindFirstChild("Humanoid") and
+        self.Humanoid and
         self.Char.Humanoid.RigType == Enum.HumanoidRigType.R6
 
 end

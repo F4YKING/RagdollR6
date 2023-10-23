@@ -24,9 +24,6 @@ Players.PlayerAdded:Connect(function(plr: Player)
 
         local hum: Humanoid = char.Humanoid
 
-        hum.BreakJointsOnDeath = false
-        hum.RequiresNeck =  false
-
         Ragdolls[plr]:Init(char)
 
         hum.Died:Connect(function()
