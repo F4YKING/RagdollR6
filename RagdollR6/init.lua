@@ -117,10 +117,10 @@ function RagdollR6:Start()
 end
 
 --[=[
-    @param forever boolean
+    @param forever boolean?
 ]=]
 
-function RagdollR6:Stop(forever: boolean)
+function RagdollR6:Stop(forever: boolean?)
 
     self.Limbs.HumanoidRootPart.CanCollide = true
 
@@ -152,7 +152,7 @@ function RagdollR6:Checks()
 end
 
 --[=[
-
+    Alternative of `RagdollR6:Stop(true)`
 ]=]
 
 function RagdollR6:Destroy()
