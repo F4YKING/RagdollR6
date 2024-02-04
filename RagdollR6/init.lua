@@ -16,6 +16,8 @@ local Trove = require(script.Parent.Trove)
 
 -- Modules
 local LimbTree = require(script.LimbTree)
+local AttachmentData = require(script.AttachmentData)
+local BallSocketData = require(script.BallSocketData)
 
 ---- Initialize ----
 -- RagdollR6
@@ -27,7 +29,7 @@ function RagdollR6.new(char: Model)
     local self = setmetatable({}, RagdollR6)
     self._trove = Trove.new()
 
-    self.Char = char :: Model
+    self.Character = char
     self.Humanoid = (char and char:FindFirstChildWhichIsA("Humanoid")) :: Humanoid?
 
     self.HumanoidRootPart = (char and char:FindFirstChild("HumanoidRootPart")) :: Part?
@@ -41,14 +43,16 @@ end
 function RagdollR6:Init()
 
     if not self:Checks() then self:Stop(true); return end
+    self._trove:AttachToInstance(self.Character); print(self)
+
     self.Humanoid.BreakJointsOnDeath = false
 
 end
 
 function RagdollR6:Checks()
-    if self.Char.Parent == nil then return end
+    if self.Character == nil then return end
 
-    return self.Char and self.Humanoid and self.HumanoidRootPart
+    return self.Character and self.Humanoid and self.HumanoidRootPart
 end
 
 -- Ragdoll
@@ -65,7 +69,7 @@ end
 
 -- Stop / Destroy
 function RagdollR6:Stop( forever: boolean? )
-
+    
 end
 
 return RagdollR6
