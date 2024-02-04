@@ -5,17 +5,10 @@
 
     "ServerScriptService": {
 
-      "RagdollScript": {
-        "$path": "RagdollScript"
-      },
+      "RagdollScript": { "$path": "RagdollScript" },
+      "RagdollR6": { "$path": "RagdollR6" },
 
-      "RagdollR6": {
-        "$path": "RagdollR6"
-      },
-      
-      "Trove": {
-        "$path": "Packages/_Index/sleitnick_trove@1.0.1/trove"
-      }
+      "Trove": { "$path": "Packages/_Index/sleitnick_trove@1.0.1/trove" }
 
     }
 
