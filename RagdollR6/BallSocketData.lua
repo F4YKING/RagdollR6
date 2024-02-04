@@ -11,7 +11,7 @@ NeckJoint.MaxFrictionTorque = 0
 -- Limits
 NeckJoint.Restitution = 0
 NeckJoint.TwistLimitsEnabled = true
-NeckJoint.UpperAngle = 0
+-- NeckJoint.UpperAngle = 0
 
 -- TwistLimits
 NeckJoint.TwistLowerAngle = -70
