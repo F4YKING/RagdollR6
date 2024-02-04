@@ -4,7 +4,7 @@ registry = "test"
 
 [[package]]
 name = "f4yking/ragdollr6"
-version = "0.1.1"
+version = "2.0.0"
 dependencies = [["Trove", "sleitnick/trove@1.0.1"]]
 
 [[package]]
