@@ -37,7 +37,9 @@ function RagdollR6.new(char: Model, ragdollWhenDie: boolean?)
     self.HumanoidRootPart = (char and char:FindFirstChild("HumanoidRootPart")) :: Part?
 
     self.Ragdolling = false
+
     self.RagdollWhenDie = ragdollWhenDie
+    self.Died = false
 
     self.Motor6Ds = {}
 
@@ -54,10 +56,9 @@ function RagdollR6:Init()
 
     if self.RagdollWhenDie then
 
-        local healthConn: RBXScriptConnection
-        healthConn = self.Humanoid.HealthChanged:Connect(function(nVal: number)
-            if nVal > 0 then return end
-            healthConn:Disconnect(); self:Start()
+        self.Humanoid.Died:Once(function()
+            self.Died = true
+            self:Start()
         end)
 
     end
@@ -85,6 +86,8 @@ function RagdollR6:Start()
 
     self.Ragdolling = true
     self:ReplaceJoints()
+
+    self.Character:SetAttribute("Ragdolling", true)
 
 end
 
@@ -143,31 +146,38 @@ function RagdollR6:ReplaceJoints()
 
     self.Humanoid.AutoRotate = false
 
-    -- if self.Humanoid.Health > 0 then
-    --     self.HumanoidRootPart:SetNetworkOwner(nil); task.wait()
-    --     self.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-    -- end
+    if self.Humanoid.Health > 0 then
+        self.HumanoidRootPart:SetNetworkOwner(nil); task.wait()
+        self.Humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
+        self.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
+        self:AddForce()
+    end
 
 end
 
 -- Stop / Destroy
 function RagdollR6:Stop( forever: boolean? )
 
+    if not self.Ragdolling then return end
+    if self.Died then return end
+
     for name: string, motor6D: Motor6D in pairs(self.Motor6Ds) do
         motor6D.Enabled = true
         self.Motor6Ds[name] = nil
     end
 
-    -- if self.Humanoid.Health > 0 then
-    --     self.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true); task.wait()
-    --     self.HumanoidRootPart:SetNetworkOwner(Players:GetPlayerFromCharacter(self.Character))
-    -- end
+    if self.Humanoid.Health > 0 then
+        self.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        self.HumanoidRootPart:SetNetworkOwner(Players:GetPlayerFromCharacter(self.Character))
+    end
 
     self._trove:Destroy()
     self._trove = if not forever then Trove.new() else nil
 
     self.Humanoid.AutoRotate = true
     self.Ragdolling = false
+
+    self.Character:SetAttribute("Ragdolling", false)
 
 end
 
@@ -176,6 +186,10 @@ function RagdollR6:Destroy()
 end
 
 -- Misc
+function RagdollR6:AddForce()
+    self.HumanoidRootPart:ApplyImpulse(self.HumanoidRootPart.CFrame.LookVector*500)
+end
+
 function RagdollR6:Toggle()
 
     if self.Ragdolling then
