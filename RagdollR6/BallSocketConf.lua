@@ -31,6 +31,13 @@ Default.Restitution = 0
 Default.TwistLimitsEnabled = false
 Default.UpperAngle = 70
 
+-- Types
+export type BallSocketConf = {
+	Instance: BallSocketConstraint,
+	Att0: string,
+	Att1: string
+}
+
 ---- Initialize ----
 -- return
 return {
@@ -40,8 +47,6 @@ return {
 
 		Att0 = "NeckAttachment",
 		Att1 = "TorsoNeckAttachment",
-
-		Parent = "Torso"
 	},
 
 	-- Torso / RightArm  - RightArm
@@ -50,8 +55,6 @@ return {
 
 		Att0 = "TorsoRightArmAttachment",
 		Att1 = "RightArmAttachment",
-
-		Parent = "Torso"
 	},
 
 	-- Torso / LeftArm - LeftArm
@@ -60,8 +63,6 @@ return {
 
 		Att0 = "TorsoLeftArmAttachment",
 		Att1 = "LeftArmAttachment",
-
-		Parent = "Torso"
 	},
 
 	-- Torso / RightLeg - RightLeg
@@ -70,8 +71,6 @@ return {
 
 		Att0 = "RightLegAttachment",
 		Att1 = "TorsoRightLegAttachment",
-
-		Parent = "Torso"
 	},
 
 	-- Torso / LeftLeg - LeftLeg
@@ -80,7 +79,5 @@ return {
 
 		Att0 = "LeftLegAttachment",
 		Att1 = "TorsoLeftLegAttachment",
-
-		Parent = "Torso"
 	}
 }

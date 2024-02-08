@@ -1,3 +1,12 @@
+--- Variables ----
+-- Types
+export type AttachmentConf = {
+	CFrame: CFrame,
+	Parent: string
+}
+
+---- Initialize ----
+-- Return
 return {
 	-- Torso / Head - Neck
 	NeckAttachment = {
