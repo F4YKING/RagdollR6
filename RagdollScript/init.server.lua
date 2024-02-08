@@ -25,14 +25,7 @@ Players.PlayerAdded:Connect(function(plr: Player)
         local humanoid: Humanoid = char:FindFirstChildWhichIsA("Humanoid")
         if not humanoid then return end
 
-        local ragdoll: RagdollR6.RagdollR6 = Ragdolls[plr]
-        if not ragdoll then ragdoll = RagdollR6.new(char) end
-
-        Ragdolls[plr] = ragdoll
-
-        humanoid.Died:Connect(function()
-            Ragdolls[plr]:Start()
-        end)
+        local ragdoll = RagdollR6.new(char, true)
 
     end)
 
