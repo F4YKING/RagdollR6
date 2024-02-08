@@ -32,8 +32,6 @@ function RagdollR6.new(char: Model, ragdollWhenDie: boolean?)
 
     self.Character = char
     self.Humanoid = (char and char:FindFirstChildWhichIsA("Humanoid")) :: Humanoid?
-
-    self.Torso = (char and char:FindFirstChild("Torso")) :: Part?
     self.HumanoidRootPart = (char and char:FindFirstChild("HumanoidRootPart")) :: Part?
 
     self.Ragdolling = false
@@ -74,7 +72,6 @@ function RagdollR6:Checks()
     and self.Humanoid
     and self.Humanoid.RigType == Enum.HumanoidRigType.R6
     and self.HumanoidRootPart
-    and self.Torso
 
 end
 
@@ -187,7 +184,7 @@ end
 
 -- Misc
 function RagdollR6:AddForce()
-    self.HumanoidRootPart:ApplyImpulse(self.HumanoidRootPart.CFrame.LookVector*500)
+    self.HumanoidRootPart:ApplyImpulse(self.HumanoidRootPart.CFrame.LookVector*100)
 end
 
 function RagdollR6:Toggle()
