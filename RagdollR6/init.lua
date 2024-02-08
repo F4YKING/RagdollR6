@@ -10,6 +10,7 @@
 ---- Variables ----
 -- Services
 local DataStoreService = game:GetService("DataStoreService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Trove
@@ -42,14 +43,14 @@ function RagdollR6.new(char: Model, ragdollWhenDie: boolean?)
     self.Limbs = {}
     self.Atts = {}
 
-    self.Motor6D = nil :: Motor6D?
+    self.Motor6Ds = {}
 
     self:Init(); return self
 end
 
 function RagdollR6:Init()
 
-    if not self:Checks() then self:Stop(true); return end
+    if not self:Checks() then self:Destroy(); return end
     self._trove:AttachToInstance(self.Character); print(self)
 
     self.Humanoid.BreakJointsOnDeath = false
@@ -77,20 +78,17 @@ end
 -- Ragdoll
 function RagdollR6:Start()
 
-    if self.Ragdolling then print("yo?"); return end
+    if self.Ragdolling then return end
     if not self:Checks() then self:Stop(true); return end
 
     self.Ragdolling = true
-    -- if self.Humanoid:GetState() == Enum.HumanoidStateType.Dead then
-    --     self.Humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
-    -- end
-
     self:SetNoCollisionConstraints()
 
     self:SetAttachments()
     self:SetBallSockets()
 
-    -- self.HumanoidRootPart.CanCollide = false
+    if self.Humanoid:GetState() == Enum.HumanoidStateType.Dead then return end
+    self.Humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
 
 end
 
@@ -143,7 +141,7 @@ function RagdollR6:SetNoCollisionConstraints()
 
         elseif v:IsA("Motor6D") and v.Name ~= "Root" and v.Name ~= "RootJoint" then
 
-            self.Motor6D = v
+            self.Motor6Ds[v.Name] = v
             v.Enabled = false
 
         end
@@ -155,21 +153,34 @@ end
 -- Stop / Destroy
 function RagdollR6:Stop( forever: boolean? )
 
-    -- self.HumanoidRootPart.CanCollide = true
-
-    if self.Motor6D then
-        self.Motor6D.Enabled = true
-        self.Motor6D = nil
+    print(self.Motor6Ds)
+    for name: string, motor6D: Motor6D in pairs(self.Motor6Ds) do
+        motor6D.Enabled = true; print(motor6D)
+        self.Motor6Ds[name] = nil
     end
 
-    -- if self.Humanoid and self.Humanoid.Health > 0 then
-    --     self.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-    -- end
-
     self._trove:Destroy()
-    self._trove = if forever then Trove.new() else nil
+    self._trove = if not forever then Trove.new() else nil
 
     self.Ragdolling = false
+
+    if self.Humanoid:GetState() == Enum.HumanoidStateType.Dead then return end
+    self.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+
+end
+
+function RagdollR6:Destroy()
+    self:Stop(true)
+end
+
+-- Misc
+function RagdollR6:Toggle()
+
+    if self.Ragdolling then
+        self:Stop()
+    else
+        self:Start()
+    end
 
 end
 
