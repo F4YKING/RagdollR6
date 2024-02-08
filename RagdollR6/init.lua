@@ -4,21 +4,20 @@
 -- // init.lua - RagdollR6.lua
 
 --[[
-
+    [08 February 2024 - 14:21:04]
+    - Thanks for @CompletedLoop (roblox) for the codes
+    - https://devforum.roblox.com/t/2413582
 ]]
 
 ---- Variables ----
--- Services
-local DataStoreService = game:GetService("DataStoreService")
+-- Service
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Trove
 local Trove = require(script.Parent.Trove)
 
 -- Modules
-local LimbTree = require(script.LimbTree)
-local AttachmentConf = require(script.AttachmentConf)
+local AttachmentCFrames = require(script.AttachmentCFrames)
 local BallSocketConf = require(script.BallSocketConf)
 
 ---- Initialize ----
@@ -40,9 +39,6 @@ function RagdollR6.new(char: Model, ragdollWhenDie: boolean?)
     self.Ragdolling = false
     self.RagdollWhenDie = ragdollWhenDie
 
-    self.Limbs = {}
-    self.Atts = {}
-
     self.Motor6Ds = {}
 
     self:Init(); return self
@@ -51,17 +47,17 @@ end
 function RagdollR6:Init()
 
     if not self:Checks() then self:Destroy(); return end
-    self._trove:AttachToInstance(self.Character); print(self)
+    self._trove:AttachToInstance(self.Character)
 
     self.Humanoid.BreakJointsOnDeath = false
+    -- self.Humanoid.RequiresNeck = false
 
     if self.RagdollWhenDie then
 
-        local humConn: RBXScriptConnection
-        humConn = self.Humanoid.HealthChanged:Connect(function(nVal: number)
-            print(nVal)
+        local healthConn: RBXScriptConnection
+        healthConn = self.Humanoid.HealthChanged:Connect(function(nVal: number)
             if nVal > 0 then return end
-            self:Start(); humConn:Disconnect()
+            healthConn:Disconnect(); self:Start()
         end)
 
     end
@@ -71,7 +67,13 @@ end
 function RagdollR6:Checks()
 
     if self.Character == nil then return end
-    return self.Character and self.Humanoid and self.HumanoidRootPart and self.Torso
+
+    return self._trove~=nil
+    and self.Character
+    and self.Humanoid
+    and self.Humanoid.RigType == Enum.HumanoidRigType.R6
+    and self.HumanoidRootPart
+    and self.Torso
 
 end
 
@@ -82,90 +84,90 @@ function RagdollR6:Start()
     if not self:Checks() then self:Stop(true); return end
 
     self.Ragdolling = true
-    self:SetNoCollisionConstraints()
-
-    self:SetAttachments()
-    self:SetBallSockets()
-
-    if self.Humanoid:GetState() == Enum.HumanoidStateType.Dead then return end
-    self.Humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
+    self:ReplaceJoints()
 
 end
 
-function RagdollR6:SetAttachments()
+function RagdollR6:CreateColliderPart(part: Part)
 
-    for name: string, conf: AttachmentConf.AttachmentConf in pairs(AttachmentConf) do
+    if not part then return end
 
-        local newAtt: Attachment = self._trove:Add(Instance.new("Attachment"))
-        newAtt.CFrame = conf.CFrame
+    local colliderPart: Part = self._trove:Add(Instance.new("Part"))
+    colliderPart.Name =  "ColliderPart"
 
-        newAtt.Name = name
-        newAtt.Parent = self.Limbs[conf.Parent]
+    colliderPart.Massless = true
+    colliderPart.Transparency = 1
 
-        self.Atts[name] = newAtt
+    colliderPart.Size = part.Size/1.7
+    colliderPart.CFrame = part.CFrame
 
-    end
+    local weldConst: WeldConstraint = Instance.new("WeldConstraint")
+    weldConst.Part0 = colliderPart
+    weldConst.Part1 = part
 
-end
-
-function RagdollR6:SetBallSockets()
-
-    for name: string, conf: BallSocketConf.BallSocketConf in pairs(BallSocketConf) do
-
-        local newBallSocket: BallSocketConstraint = self._trove:Add(conf.Instance:Clone());
-
-        newBallSocket.Attachment0 = self.Atts[conf.Att0]
-        newBallSocket.Attachment1 = self.Atts[conf.Att1]
-
-        newBallSocket.Name = name
-        newBallSocket.Parent = self.Torso
-    end
+    weldConst.Parent = colliderPart
+    colliderPart.Parent = part
 
 end
 
-function RagdollR6:SetNoCollisionConstraints()
+function RagdollR6:ReplaceJoints()
 
-    for _, v: BasePart | Motor6D in ipairs(self.Character:GetDescendants()) do
+    for _, motor: Motor6D in pairs(self.Character:GetDescendants()) do
 
-        if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
+        if not motor:IsA("Motor6D") then continue end
+        if not AttachmentCFrames[motor.Name] then continue end
 
-            local nCollConst: NoCollisionConstraint = self._trove:Add(Instance.new("NoCollisionConstraint"))
+        motor.Enabled = false
 
-            nCollConst.Part0 = v
-            nCollConst.Part1 = self.Torso
+        local att0: Attachment = self._trove:Add(Instance.new("Attachment"))
+        local att1: Attachment = self._trove:Add(Instance.new("Attachment"))
+        att0.CFrame = AttachmentCFrames[motor.Name][1]
+        att1.CFrame = AttachmentCFrames[motor.Name][2]
 
-            nCollConst.Name = v.Name
-            nCollConst.Parent = self.Torso
+        att0.Name = "RagdollAttachment"
+        att1.Name = "RagdollAttachment"
 
-            self.Limbs[v.Name] = v
+        self:CreateColliderPart(motor.Part1)
 
-        elseif v:IsA("Motor6D") and v.Name ~= "Root" and v.Name ~= "RootJoint" then
+        local ballSocket: BallSocketConstraint = BallSocketConf[motor.Name~="Neck" and 1 or 2]:Clone()
+        ballSocket.Attachment0 = att0
+        ballSocket.Attachment1 = att1
 
-            self.Motor6Ds[v.Name] = v
-            v.Enabled = false
+        att0.Parent = motor.Part0
+        att1.Parent = motor.Part1
 
-        end
+        ballSocket.Parent = motor.Parent
+        self.Motor6Ds[motor.Name] = motor
 
     end
+
+    self.Humanoid.AutoRotate = false
+
+    -- if self.Humanoid.Health > 0 then
+    --     self.HumanoidRootPart:SetNetworkOwner(nil); task.wait()
+    --     self.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
+    -- end
 
 end
 
 -- Stop / Destroy
 function RagdollR6:Stop( forever: boolean? )
 
-    print(self.Motor6Ds)
     for name: string, motor6D: Motor6D in pairs(self.Motor6Ds) do
-        motor6D.Enabled = true; print(motor6D)
+        motor6D.Enabled = true
         self.Motor6Ds[name] = nil
     end
+
+    -- if self.Humanoid.Health > 0 then
+    --     self.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true); task.wait()
+    --     self.HumanoidRootPart:SetNetworkOwner(Players:GetPlayerFromCharacter(self.Character))
+    -- end
 
     self._trove:Destroy()
     self._trove = if not forever then Trove.new() else nil
 
+    self.Humanoid.AutoRotate = true
     self.Ragdolling = false
-
-    if self.Humanoid:GetState() == Enum.HumanoidStateType.Dead then return end
-    self.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 
 end
 
